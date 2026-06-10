@@ -1,13 +1,10 @@
 from django.test import TestCase
-
-# Create your tests here.
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import date, time, timedelta
-
 from reservaciones.forms import ReservacionForm
 from .models import Sala, Reservacion
-
 from .services import crear_reservacion
 
 class ReservacionTests(TestCase):
@@ -58,3 +55,15 @@ class ReservacionTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('asistentes', form.errors)
+
+    def test_ut04_rechazar_asistentes_superiores_capacidad(self):
+        with self.assertRaises(ValidationError):
+            crear_reservacion(
+                usuario=self.usuario,
+                sala=self.sala,
+                fecha=date(2026, 6, 16),
+                hora_inicio=time(10, 0),
+                hora_fin=time(11, 0),
+                asistentes=5, 
+                proposito="Reunión de estudio"
+            )
