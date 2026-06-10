@@ -11,3 +11,9 @@ class ReservacionForm(forms.ModelForm):
         if len(proposito) < 10:
             raise forms.ValidationError("El propósito debe tener al menos 10 caracteres.")
         return proposito
+    
+    def clean_asistentes(self):
+        asistentes = self.cleaned_data.get('asistentes')
+        if asistentes is not None and asistentes <= 0:
+            raise forms.ValidationError("Debe haber al menos 1 asistente.")
+        return asistentes

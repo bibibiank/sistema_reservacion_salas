@@ -51,9 +51,10 @@ class ReservacionTests(TestCase):
             'fecha': date.today() + timedelta(days=1),
             'hora_inicio': '10:00',
             'hora_fin': '11:00',
-            'asistentes': 0, # ¡Inválido!
+            'asistentes': 0, 
             'proposito': 'Reunión de estudio válida'
         }
         form = ReservacionForm(data=form_data)
+
         self.assertFalse(form.is_valid())
         self.assertIn('asistentes', form.errors)
