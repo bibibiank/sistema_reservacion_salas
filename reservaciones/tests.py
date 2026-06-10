@@ -133,3 +133,23 @@ class ReservacionTests(TestCase):
             time(10, 0), time(11, 0), 2, "Nueva"
         )
         self.assertEqual(res_nueva.estado, 'VIGENTE')
+    
+    def test_ut11_impedir_acceso_anonimo(self):
+        response = self.client.get(self.url)
+        # Debe redirigir al login (código HTTP 302)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_ut12_crear_reservacion_post(self):
+        self.client.login(username='biankk', password='password')
+        data = {
+            'sala': self.sala.id,
+            'fecha': date.today() + timedelta(days=1),
+            'hora_inicio': '10:00',
+            'hora_fin': '11:00',
+            'asistentes': 2,
+            'proposito': 'Reserva desde vista'
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Reservacion.objects.count(), 1)
