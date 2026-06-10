@@ -7,6 +7,7 @@ from reservaciones.forms import ReservacionForm
 from .models import Sala, Reservacion
 from .services import crear_reservacion
 
+
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
 
@@ -115,3 +116,20 @@ class ReservacionTests(TestCase):
             crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(9, 30), time(10, 30), 2, "Parcial")
         with self.assertRaises(ValidationError):
             crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(10, 30), time(11, 30), 2, "Contenido")
+    
+    def test_ut09_permitir_horarios_adyacentes(self):
+        crear_reservacion(self.usuario, self.sala, date(2026, 6, 19), time(10, 0), time(11, 0), 2, "Reserva 1")
+        res_2 = crear_reservacion(self.usuario, self.sala, date(2026, 6, 19), time(11, 0), time(12, 0), 2, "Reserva 2")
+        self.assertEqual(res_2.estado, 'VIGENTE')
+
+    def test_ut10_ignorar_reservaciones_canceladas(self):
+        Reservacion.objects.create(
+            usuario=self.usuario, sala=self.sala, fecha=date(2026, 6, 20),
+            hora_inicio=time(10, 0), hora_fin=time(11, 0), asistentes=2,
+            proposito="Cancelada", estado='CANCELADA'
+        )
+        res_nueva = crear_reservacion(
+            self.usuario, self.sala, date(2026, 6, 20), 
+            time(10, 0), time(11, 0), 2, "Nueva"
+        )
+        self.assertEqual(res_nueva.estado, 'VIGENTE')
