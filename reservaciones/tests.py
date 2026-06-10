@@ -86,7 +86,7 @@ class ReservacionTests(TestCase):
             'sala': self.sala.id,
             'fecha': date.today() + timedelta(days=1),
             'hora_inicio': '11:00',
-            'hora_fin': '10:00', # ¡Termina antes de empezar!
+            'hora_fin': '10:00', 
             'asistentes': 2,
             'proposito': 'Reunión de estudio válida'
         }
