@@ -4,6 +4,8 @@ from django.test import TestCase
 from django.test import TestCase
 from django.contrib.auth.models import User
 from datetime import date, time, timedelta
+
+from reservaciones.forms import ReservacionForm
 from .models import Sala, Reservacion
 
 from .services import crear_reservacion
