@@ -1,8 +1,11 @@
 from datetime import datetime, date
-from .models import Reservacion
+from .models import Reservacion, Sala
+from django.db import transaction
 from django.core.exceptions import ValidationError
 
+@transaction.atomic
 def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, proposito):
+    sala_bloqueada = Sala.objects.select_for_update().get(id=sala.id)
     if asistentes > sala.capacidad:
         raise ValidationError("El número de asistentes supera la capacidad de la sala.")
     inicio_dt = datetime.combine(fecha, hora_inicio)
