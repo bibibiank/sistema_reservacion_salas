@@ -71,7 +71,7 @@ class ReservacionTests(TestCase):
     def test_ut05_rechazar_fecha_pasada(self):
         form_data = {
             'sala': self.sala.id,
-            'fecha': date.today() - timedelta(days=1), # ¡Ayer!
+            'fecha': date.today() - timedelta(days=1), 
             'hora_inicio': '10:00',
             'hora_fin': '11:00',
             'asistentes': 2,

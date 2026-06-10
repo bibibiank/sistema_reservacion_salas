@@ -1,3 +1,5 @@
+from datetime import date
+
 from django import forms
 from .models import Reservacion
 
@@ -17,3 +19,9 @@ class ReservacionForm(forms.ModelForm):
         if asistentes is not None and asistentes <= 0:
             raise forms.ValidationError("Debe haber al menos 1 asistente.")
         return asistentes
+    
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+        if fecha and fecha < date.today():
+            raise forms.ValidationError("No se puede reservar en fechas pasadas.")
+        return fecha
