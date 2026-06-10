@@ -44,3 +44,16 @@ class ReservacionTests(TestCase):
     
         self.assertFalse(form.is_valid())
         self.assertIn('proposito', form.errors)
+
+    def test_ut03_rechazar_asistentes_cero_o_negativo(self):
+        form_data = {
+            'sala': self.sala.id,
+            'fecha': date.today() + timedelta(days=1),
+            'hora_inicio': '10:00',
+            'hora_fin': '11:00',
+            'asistentes': 0, # ¡Inválido!
+            'proposito': 'Reunión de estudio válida'
+        }
+        form = ReservacionForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('asistentes', form.errors)
