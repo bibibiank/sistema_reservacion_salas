@@ -1,7 +1,10 @@
 from .models import Reservacion
+from django.core.exceptions import ValidationError
 
 def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, proposito):
-    # Guardamos la reservación directo en la base de datos
+    # Regla RN-02: Validar capacidad
+    if asistentes > sala.capacidad:
+        raise ValidationError("El número de asistentes supera la capacidad de la sala.")
     reservacion = Reservacion.objects.create(
         usuario=usuario,
         sala=sala,
