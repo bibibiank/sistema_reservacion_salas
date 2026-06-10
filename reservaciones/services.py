@@ -11,6 +11,15 @@ def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, p
     
     if duracion_minutos < 30 or duracion_minutos > 120:
         raise ValidationError("La reservación debe durar entre 30 minutos y 2 horas.")
+    traslapes = Reservacion.objects.filter(
+        sala=sala,
+        fecha=fecha,
+        estado='VIGENTE',
+        hora_inicio__lt=hora_fin,
+        hora_fin__gt=hora_inicio
+    )
+    if traslapes.exists():
+        raise ValidationError("La sala ya tiene una reservación vigente en ese horario.")
     reservacion = Reservacion.objects.create(
         usuario=usuario,
         sala=sala,
