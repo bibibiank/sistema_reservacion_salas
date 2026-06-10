@@ -80,3 +80,15 @@ class ReservacionTests(TestCase):
         form = ReservacionForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('fecha', form.errors)
+
+    def test_ut06_rechazar_hora_fin_invalida(self):
+        form_data = {
+            'sala': self.sala.id,
+            'fecha': date.today() + timedelta(days=1),
+            'hora_inicio': '11:00',
+            'hora_fin': '10:00', # ¡Termina antes de empezar!
+            'asistentes': 2,
+            'proposito': 'Reunión de estudio válida'
+        }
+        form = ReservacionForm(data=form_data)
+        self.assertFalse(form.is_valid())
