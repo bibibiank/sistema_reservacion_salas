@@ -7,7 +7,8 @@ from reservaciones.forms import ReservacionForm
 from .models import Sala, Reservacion
 from .services import crear_reservacion
 from django.urls import reverse
-
+from django.test import TransactionTestCase
+import threading
 
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
@@ -154,4 +155,31 @@ class ReservacionTests(TestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(Reservacion.objects.count(), 1)
+
+class ConcurrenciaTests(TransactionTestCase):
+    fixtures = ['salas_iniciales.json']
+
+    def setUp(self):
+        self.usuario1 = User.objects.create_user(username='miguelon', password='skrillex')
+        self.usuario2 = User.objects.create_user(username='sadnisbi', password='bts')
+        self.sala = Sala.objects.get(nombre='Sala A')
+
+    def test_it01_solicitudes_concurrentes(self):
+        def intento_de_reserva(usuario):
+            try:
+                crear_reservacion(
+                    usuario, self.sala, date(2026, 6, 25), 
+                    time(10, 0), time(11, 0), 2, "Concurrencia"
+                )
+            except ValidationError:
+                pass 
+
+        hilo1 = threading.Thread(target=intento_de_reserva, args=(self.usuario1,))
+        hilo2 = threading.Thread(target=intento_de_reserva, args=(self.usuario2,))
+
+        hilo1.start()
+        hilo2.start()
+        hilo1.join()
+        hilo2.join()
         self.assertEqual(Reservacion.objects.count(), 1)
