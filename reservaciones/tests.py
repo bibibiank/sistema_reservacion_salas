@@ -104,3 +104,14 @@ class ReservacionTests(TestCase):
                 self.usuario, self.sala, date(2026, 6, 17), 
                 time(10, 0), time(13, 0), 2, "Proposito válido"
             )
+
+    def test_ut08_detectar_traslapes(self):
+        crear_reservacion(
+            self.usuario, self.sala, date(2026, 6, 18), 
+            time(10, 0), time(12, 0), 2, "Reserva Base"
+        )
+
+        with self.assertRaises(ValidationError):
+            crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(9, 30), time(10, 30), 2, "Parcial")
+        with self.assertRaises(ValidationError):
+            crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(10, 30), time(11, 30), 2, "Contenido")
