@@ -1,10 +1,16 @@
+from datetime import datetime, date
 from .models import Reservacion
 from django.core.exceptions import ValidationError
 
 def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, proposito):
-    # Regla RN-02: Validar capacidad
     if asistentes > sala.capacidad:
         raise ValidationError("El número de asistentes supera la capacidad de la sala.")
+    inicio_dt = datetime.combine(fecha, hora_inicio)
+    fin_dt = datetime.combine(fecha, hora_fin)
+    duracion_minutos = (fin_dt - inicio_dt).total_seconds() / 60
+    
+    if duracion_minutos < 30 or duracion_minutos > 120:
+        raise ValidationError("La reservación debe durar entre 30 minutos y 2 horas.")
     reservacion = Reservacion.objects.create(
         usuario=usuario,
         sala=sala,

@@ -94,7 +94,6 @@ class ReservacionTests(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_ut07_rechazar_duracion_invalida(self):
-        # Duración de 20 minutos (menor a 30)
         with self.assertRaises(ValidationError):
             crear_reservacion(
                 self.usuario, self.sala, date(2026, 6, 17), 
