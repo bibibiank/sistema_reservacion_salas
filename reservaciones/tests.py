@@ -6,6 +6,7 @@ from datetime import date, time, timedelta
 from reservaciones.forms import ReservacionForm
 from .models import Sala, Reservacion
 from .services import crear_reservacion
+from django.urls import reverse
 
 
 class ReservacionTests(TestCase):
@@ -13,7 +14,8 @@ class ReservacionTests(TestCase):
 
     def setUp(self):
         self.usuario = User.objects.create_user(username='biankk', password='jungkook')
-        self.sala = Sala.objects.get(nombre='Sala A') # Capacidad 4, Activa
+        self.sala = Sala.objects.get(nombre='Sala A')
+        self.url = reverse('crear_reservacion')
 
     def test_ut01_crear_reservacion_valida(self):
         reservacion = crear_reservacion(
@@ -141,7 +143,7 @@ class ReservacionTests(TestCase):
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
     def test_ut12_crear_reservacion_post(self):
-        self.client.login(username='biankk', password='password')
+        self.client.login(username='biankk', password='jungkook')
         data = {
             'sala': self.sala.id,
             'fecha': date.today() + timedelta(days=1),
