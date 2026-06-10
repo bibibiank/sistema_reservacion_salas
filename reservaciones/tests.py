@@ -67,3 +67,16 @@ class ReservacionTests(TestCase):
                 asistentes=5, 
                 proposito="Reunión de estudio"
             )
+
+    def test_ut05_rechazar_fecha_pasada(self):
+        form_data = {
+            'sala': self.sala.id,
+            'fecha': date.today() - timedelta(days=1), # ¡Ayer!
+            'hora_inicio': '10:00',
+            'hora_fin': '11:00',
+            'asistentes': 2,
+            'proposito': 'Reunión de estudio válida'
+        }
+        form = ReservacionForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('fecha', form.errors)
