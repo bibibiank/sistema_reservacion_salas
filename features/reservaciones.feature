@@ -14,3 +14,13 @@ Característica: Registrar una reservación de sala
     Y muestra un mensaje de confirmación
     Y la reservación aparece en la lista de reservaciones del usuario
     
+  Escenario: CA-02. Rechazar reservación por traslape de horario
+    Dado que existe una sala activa con capacidad suficiente
+    Y el usuario ha iniciado sesión
+    Y existe una reservación previa en la sala de "10:00" a "12:00" para mañana
+    Cuando navega al formulario de nueva reservacion
+    Y captura la misma fecha, hora de inicio "11:00" y hora de fin "13:00"
+    Y captura un número de asistentes permitido y un propósito válido
+    Y envía el formulario
+    Entonces el sistema rechaza la reservación
+    Y muestra un mensaje de error indicando el traslape

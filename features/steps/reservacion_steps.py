@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 from django.urls import reverse
 import time
 from selenium.webdriver.support.ui import Select
+from datetime import datetime
+
 
 @given('que existe una sala activa con capacidad suficiente')
 def step_impl(context):
@@ -52,7 +54,7 @@ def step_impl(context):
         By.ID,
         'id_hora_fin'
     ).send_keys('11:00')
-    
+
 @when('captura un número de asistentes permitido y un propósito válido')
 def step_impl(context):
     context.browser.find_element(By.ID, 'id_asistentes').send_keys('2')
@@ -87,3 +89,56 @@ def step_impl(context):
     # Verificamos que la tabla html contenga el nombre de la sala
     tabla = context.browser.find_element(By.ID, 'tabla-reservaciones').text
     assert 'Sala A' in tabla, "La sala no apareció en la lista"
+
+
+# -----------------------CA-02 
+
+@given('existe una reservación previa en la sala de "{h_inicio}" a "{h_fin}" para mañana')
+def step_impl(context, h_inicio, h_fin):
+    manana = date.today() + timedelta(days=1)
+    t_inicio = datetime.strptime(h_inicio, '%H:%M').time()
+    t_fin = datetime.strptime(h_fin, '%H:%M').time()
+    
+    Reservacion.objects.create(
+        usuario=User.objects.get(username='biankk'),
+        sala=context.sala,
+        fecha=manana,
+        hora_inicio=t_inicio,
+        hora_fin=t_fin,
+        asistentes=2,
+        proposito="Reserva base para probar el traslape",
+        estado='VIGENTE'
+    )
+
+@when('captura la misma fecha, hora de inicio "{h_inicio}" y hora de fin "{h_fin}"')
+def step_impl(context, h_inicio, h_fin):
+    manana = date.today() + timedelta(days=1)
+    
+    elemento_sala = context.browser.find_element(By.ID, 'id_sala')
+    select_sala = Select(elemento_sala)
+    select_sala.select_by_visible_text('Sala A')
+    fecha_input = context.browser.find_element(By.ID, 'id_fecha')
+    fecha_input.clear()
+    context.browser.execute_script(
+    f"arguments[0].value='{manana.strftime('%Y-%m-%d')}';",
+    fecha_input
+)
+    hora_inicio_input = context.browser.find_element(By.ID, 'id_hora_inicio')
+    hora_fin_input = context.browser.find_element(By.ID, 'id_hora_fin')
+    
+    context.browser.execute_script(f"arguments[0].value = '{h_inicio}';", hora_inicio_input)
+    context.browser.execute_script(f"arguments[0].value = '{h_fin}';", hora_fin_input)
+
+@then('el sistema rechaza la reservación')
+def step_impl(context):
+    reservas = Reservacion.objects.filter(usuario__username='biankk')
+    assert reservas.count() == 1, f"¡Error crítico! El traslape se guardó en la BD. Hay {reservas.count()} reservas."
+
+@then('muestra un mensaje de error indicando el traslape')
+def step_impl(context):
+    print(context.browser.page_source)
+
+    assert (
+        "La sala ya tiene una reservación vigente en ese horario."
+        in context.browser.page_source
+    ), "No se mostró el mensaje de error de traslape en la pantalla."
