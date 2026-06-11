@@ -237,3 +237,11 @@ class CancelacionTests(TestCase):
         cancelar_reservacion(self.usuario, self.reserva.id)
         with self.assertRaises(ValidationError):
             cancelar_reservacion(self.usuario, self.reserva.id)
+
+    def test_ut18_liberar_sala_tras_cancelacion(self):
+        cancelar_reservacion(self.usuario, self.reserva.id)
+        nueva_reserva = crear_reservacion(
+            self.otro_usuario, self.sala, self.reserva.fecha,
+            self.reserva.hora_inicio, self.reserva.hora_fin, 2, "Nueva"
+        )
+        self.assertEqual(nueva_reserva.estado, 'VIGENTE')
