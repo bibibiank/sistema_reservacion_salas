@@ -45,6 +45,12 @@ def cancelar_reservacion(usuario, reservacion_id):
     if reservacion.usuario != usuario:
         raise ValidationError("No tienes permiso para cancelar esta reservación.")
     
+    ahora = timezone.now()
+    inicio_dt = timezone.make_aware(datetime.combine(reservacion.fecha, reservacion.hora_inicio))
+    diferencia_minutos = (inicio_dt - ahora).total_seconds() / 60
+    
+    if diferencia_minutos <= 60:
+        raise ValidationError("Debes cancelar con más de 60 minutos de anticipación.")
     reservacion.estado = 'CANCELADA'
     reservacion.fecha_cancelacion = timezone.now()
     reservacion.save()

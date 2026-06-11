@@ -11,7 +11,7 @@ from django.test import TransactionTestCase
 import threading
 from .services import cancelar_reservacion
 from django.db import OperationalError
-from time import sleep
+from time import sleep, timezone
 
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
@@ -215,3 +215,11 @@ class CancelacionTests(TestCase):
     def test_ut14_rechazar_cancelacion_ajena(self):
         with self.assertRaises(ValidationError):
             cancelar_reservacion(self.otro_usuario, self.reserva.id)
+
+    def test_ut15_rechazar_cancelacion_60_minutos_exactos(self):
+        ahora = timezone.now()
+        self.reserva.fecha = ahora.date()
+        self.reserva.hora_inicio = (ahora + timedelta(minutes=60)).time()
+        self.reserva.save()
+        with self.assertRaises(ValidationError):
+            cancelar_reservacion(self.usuario, self.reserva.id)
