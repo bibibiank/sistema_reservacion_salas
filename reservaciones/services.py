@@ -44,6 +44,8 @@ def cancelar_reservacion(usuario, reservacion_id):
     
     if reservacion.usuario != usuario:
         raise ValidationError("No tienes permiso para cancelar esta reservación.")
+    if reservacion.estado != 'VIGENTE':
+        raise ValidationError("La reservación ya fue cancelada.")
     
     ahora = timezone.now()
     inicio_dt = timezone.make_aware(datetime.combine(reservacion.fecha, reservacion.hora_inicio))
