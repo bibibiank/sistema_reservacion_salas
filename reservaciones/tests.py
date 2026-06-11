@@ -232,3 +232,8 @@ class CancelacionTests(TestCase):
         self.reserva.save()
         with self.assertRaises(ValidationError):
             cancelar_reservacion(self.usuario, self.reserva.id)
+
+    def test_ut17_rechazar_segunda_cancelacion(self):
+        cancelar_reservacion(self.usuario, self.reserva.id)
+        with self.assertRaises(ValidationError):
+            cancelar_reservacion(self.usuario, self.reserva.id)
