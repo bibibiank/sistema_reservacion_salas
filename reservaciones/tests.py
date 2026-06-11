@@ -245,3 +245,23 @@ class CancelacionTests(TestCase):
             self.reserva.hora_inicio, self.reserva.hora_fin, 2, "Nueva"
         )
         self.assertEqual(nueva_reserva.estado, 'VIGENTE')
+
+class CancelacionVistasTests(TestCase):
+    fixtures = ['salas_iniciales.json']
+
+    def setUp(self):
+        self.usuario = User.objects.create_user(username='biankk', password='pwd')
+        self.sala = Sala.objects.get(nombre='Sala A')
+        manana = date.today() + timedelta(days=1)
+        self.reserva = Reservacion.objects.create(
+            usuario=self.usuario, sala=self.sala, fecha=manana,
+            hora_inicio=time(15, 0), hora_fin=time(16, 0),
+            asistentes=2, proposito="Reserva a cancelar", estado='VIGENTE'
+        )
+        self.url = reverse('cancelar_reservacion', args=[self.reserva.id])
+
+    def test_ut19_impedir_cancelacion_anonima(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302) 
+
+    

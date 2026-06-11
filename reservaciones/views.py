@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ReservacionForm
-from .services import crear_reservacion
+from .services import crear_reservacion, cancelar_reservacion
 
 @login_required
 def crear_reservacion_view(request):
@@ -30,3 +30,13 @@ def crear_reservacion_view(request):
     else:
         form = ReservacionForm()
     return render(request, 'reservaciones/crear.html', {'form': form})
+
+@login_required
+def cancelar_reservacion_view(request, reservacion_id):
+    if request.method == 'POST':
+        try:
+            cancelar_reservacion(request.user, reservacion_id)
+            messages.success(request, 'Reservación cancelada con éxito.')
+        except ValidationError as e:
+            messages.error(request, e.message)
+    return redirect('inicio')
