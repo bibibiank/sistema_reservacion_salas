@@ -1,0 +1,35 @@
+=========================
+Entornos Virtuales
+=========================
+.venv/
+venv/
+env/
+
+=========================
+Archivos de Python
+=========================
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+=========================
+Base de datos local
+=========================
+Ignoramos la base local porque cada quien debe correr sus migraciones [cite: 132]
+db.sqlite3
+
+=========================
+Pruebas y Cobertura
+=========================
+.coverage
+htmlcov/
+.pytest_cache/
+
+=========================
+Archivos de Sistema Operativo y Editores
+=========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
