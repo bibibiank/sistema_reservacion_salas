@@ -41,8 +41,13 @@ def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, p
 
 def cancelar_reservacion(usuario, reservacion_id):
     reservacion = Reservacion.objects.get(id=reservacion_id)
+    
+    if reservacion.usuario != usuario:
+        raise ValidationError("No tienes permiso para cancelar esta reservación.")
+    
     reservacion.estado = 'CANCELADA'
     reservacion.fecha_cancelacion = timezone.now()
     reservacion.save()
     
     return reservacion
+

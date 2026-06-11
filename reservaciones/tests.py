@@ -11,6 +11,7 @@ from django.test import TransactionTestCase
 import threading
 from .services import cancelar_reservacion
 from django.db import OperationalError
+from time import sleep
 
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
@@ -168,7 +169,8 @@ class ConcurrenciaTests(TransactionTestCase):
         self.sala = Sala.objects.get(nombre='Sala A')
 
     def test_it01_solicitudes_concurrentes(self):
-        def intento_de_reserva(usuario):
+        def intento_de_reserva(usuario, retardo):
+            sleep(retardo)  
             try:
                 crear_reservacion(
                     usuario, self.sala, date(2026, 6, 25), 
@@ -177,13 +179,14 @@ class ConcurrenciaTests(TransactionTestCase):
             except (ValidationError, OperationalError):
                 pass 
 
-        hilo1 = threading.Thread(target=intento_de_reserva, args=(self.usuario1,))
-        hilo2 = threading.Thread(target=intento_de_reserva, args=(self.usuario2,))
-
+        hilo1 = threading.Thread(target=intento_de_reserva, args=(self.usuario1, 0))
+        hilo2 = threading.Thread(target=intento_de_reserva, args=(self.usuario2, 0.1))
+        
         hilo1.start()
         hilo2.start()
         hilo1.join()
         hilo2.join()
+
         self.assertEqual(Reservacion.objects.count(), 1)
 
 
