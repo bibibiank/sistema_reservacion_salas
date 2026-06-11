@@ -1,0 +1,12 @@
+{% extends 'reservaciones/base.html' %}
+
+{% block content %}
+    <h2>Iniciar Sesión</h2>
+    <form method="post" id="formulario-login">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" id="btn-login">Entrar</button>
+    </form>
+{% endblock content %}
+
+

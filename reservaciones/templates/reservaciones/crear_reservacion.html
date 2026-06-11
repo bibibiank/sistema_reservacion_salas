@@ -1,0 +1,13 @@
+{% extends 'reservaciones/base.html' %}
+
+{% block content %}
+    <h2>Registrar una reservación de sala</h2>
+    
+    <form method="post" id="formulario-reservacion">
+        {% csrf_token %}
+        
+        {{ form.as_p }}
+        
+        <button type="submit" id="btn-guardar-reserva">Reservar Sala</button>
+    </form>
+{% endblock content %}

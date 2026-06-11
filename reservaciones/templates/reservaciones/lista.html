@@ -1,0 +1,31 @@
+{% extends 'reservaciones/base.html' %}
+
+{% block content %}
+    <h2>Mis Reservaciones</h2>
+    <a href="{% url 'crear_reservacion' %}" id="btn-nueva-reserva">Nueva Reservación</a>
+
+    <table id="tabla-reservaciones" border="1" style="margin-top: 20px;">
+        <thead>
+            <tr>
+                <th>Sala</th>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservaciones %}
+                <tr class="fila-reserva">
+                    <td>{{ reserva.sala.nombre }}</td>
+                    <td>{{ reserva.fecha }}</td>
+                    <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+                    <td>{{ reserva.estado }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" id="mensaje-vacio">No tienes reservaciones vigentes.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

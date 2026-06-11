@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 from .forms import ReservacionForm
 from .services import crear_reservacion, cancelar_reservacion
 
+from .models import Reservacion 
+
 @login_required
 def crear_reservacion_view(request):
     if request.method == 'POST':
@@ -27,7 +29,7 @@ def crear_reservacion_view(request):
                 form.add_error(None, e.message)
     else:
         form = ReservacionForm()
-    return render(request, 'reservaciones/crear.html', {'form': form})
+    return render(request, 'reservaciones/crear_reservacion.html', {'form': form})
 
 @login_required
 def cancelar_reservacion_view(request, reservacion_id):
@@ -38,3 +40,9 @@ def cancelar_reservacion_view(request, reservacion_id):
         except ValidationError as e:
             messages.error(request, e.message)
     return redirect('inicio')
+
+@login_required
+def lista_reservaciones_view(request):
+    # Traemos solo las reservas del usuario autenticado
+    reservaciones = Reservacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')
+    return render(request, 'reservaciones/lista.html', {'reservaciones': reservaciones})
