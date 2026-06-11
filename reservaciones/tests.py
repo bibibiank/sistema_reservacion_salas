@@ -12,6 +12,7 @@ import threading
 from .services import cancelar_reservacion
 from django.db import OperationalError
 from time import sleep, timezone
+from django.utils import timezone
 
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
