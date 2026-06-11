@@ -224,3 +224,11 @@ class CancelacionTests(TestCase):
         self.reserva.save()
         with self.assertRaises(ValidationError):
             cancelar_reservacion(self.usuario, self.reserva.id)
+
+    def test_ut16_rechazar_cancelacion_menor_60_minutos(self):
+        ahora = timezone.now()
+        self.reserva.fecha = ahora.date()
+        self.reserva.hora_inicio = (ahora + timedelta(minutes=30)).time()
+        self.reserva.save()
+        with self.assertRaises(ValidationError):
+            cancelar_reservacion(self.usuario, self.reserva.id)
