@@ -264,4 +264,10 @@ class CancelacionVistasTests(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302) 
 
+    def test_ut20_cancelar_reservacion_post(self):
+        self.client.login(username='biankk', password='pwd')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302) 
+        self.reserva.refresh_from_db()
+        self.assertEqual(self.reserva.estado, 'CANCELADA')
     
