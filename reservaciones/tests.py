@@ -9,6 +9,8 @@ from .services import crear_reservacion
 from django.urls import reverse
 from django.test import TransactionTestCase
 import threading
+from .services import cancelar_reservacion
+from django.db import OperationalError
 
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
@@ -172,7 +174,7 @@ class ConcurrenciaTests(TransactionTestCase):
                     usuario, self.sala, date(2026, 6, 25), 
                     time(10, 0), time(11, 0), 2, "Concurrencia"
                 )
-            except ValidationError:
+            except (ValidationError, OperationalError):
                 pass 
 
         hilo1 = threading.Thread(target=intento_de_reserva, args=(self.usuario1,))
@@ -183,3 +185,26 @@ class ConcurrenciaTests(TransactionTestCase):
         hilo1.join()
         hilo2.join()
         self.assertEqual(Reservacion.objects.count(), 1)
+
+
+
+class CancelacionTests(TestCase):
+    fixtures = ['salas_iniciales.json']
+
+    def setUp(self):
+        self.usuario = User.objects.create_user(username='biankk', password='pwd')
+        self.otro_usuario = User.objects.create_user(username='intruso', password='pwd')
+        self.sala = Sala.objects.get(nombre='Sala A')
+        
+        manana = date.today() + timedelta(days=1)
+        self.reserva = Reservacion.objects.create(
+            usuario=self.usuario, sala=self.sala, fecha=manana,
+            hora_inicio=time(15, 0), hora_fin=time(16, 0),
+            asistentes=2, proposito="Reserva a cancelar", estado='VIGENTE'
+        )
+
+    def test_ut13_cancelar_reservacion_valida(self):
+        res_cancelada = cancelar_reservacion(self.usuario, self.reserva.id)
+        
+        self.assertEqual(res_cancelada.estado, 'CANCELADA')
+        self.assertIsNotNone(res_cancelada.fecha_cancelacion)
