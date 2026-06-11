@@ -2,6 +2,7 @@ from datetime import datetime, date
 from .models import Reservacion, Sala
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 @transaction.atomic
 def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, proposito):
@@ -36,4 +37,12 @@ def crear_reservacion(usuario, sala, fecha, hora_inicio, hora_fin, asistentes, p
         proposito=proposito,
         estado='VIGENTE'
     )
+    return reservacion
+
+def cancelar_reservacion(usuario, reservacion_id):
+    reservacion = Reservacion.objects.get(id=reservacion_id)
+    reservacion.estado = 'CANCELADA'
+    reservacion.fecha_cancelacion = timezone.now()
+    reservacion.save()
+    
     return reservacion
