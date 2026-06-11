@@ -208,3 +208,7 @@ class CancelacionTests(TestCase):
         
         self.assertEqual(res_cancelada.estado, 'CANCELADA')
         self.assertIsNotNone(res_cancelada.fecha_cancelacion)
+
+    def test_ut14_rechazar_cancelacion_ajena(self):
+        with self.assertRaises(ValidationError):
+            cancelar_reservacion(self.otro_usuario, self.reserva.id)
