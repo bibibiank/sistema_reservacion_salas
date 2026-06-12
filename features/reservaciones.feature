@@ -24,3 +24,10 @@ Característica: Registrar una reservación de sala
     Y envía el formulario
     Entonces el sistema rechaza la reservación
     Y muestra un mensaje de error indicando el traslape
+
+  Escenario: CA-03. Rechazar una reservación que exceda la capacidad
+    Dado que una sala activa tiene capacidad para 4 personas
+    Y el usuario ha iniciado sesión
+    Cuando intenta registrar una reservación para 5 asistentes
+    Entonces el sistema no registra la reservación
+    Y muestra un mensaje indicando que el número de asistentes supera la capacidad de la sala

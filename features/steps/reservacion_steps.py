@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from behave import given, when, then
 from django.contrib.auth.models import User
 from reservaciones.models import Sala, Reservacion
@@ -142,3 +144,60 @@ def step_impl(context):
         "La sala ya tiene una reservación vigente en ese horario."
         in context.browser.page_source
     ), "No se mostró el mensaje de error de traslape en la pantalla."
+
+
+#----CA- 03-----
+
+@given('que una sala activa tiene capacidad para 4 personas')
+def step_impl(context):
+    context.sala = Sala.objects.first()
+    context.sala.capacidad = 4
+    context.sala.save()
+
+@when('intenta registrar una reservación para 5 asistentes')
+def step_impl(context):
+    manana = date.today() + timedelta(days=1)
+
+    context.browser.get(context.get_url('/reservar/'))
+
+    print(context.browser.current_url)
+    print(context.browser.page_source)
+
+    Select(
+        context.browser.find_element(By.ID, 'id_sala')
+    ).select_by_visible_text('Sala A')
+
+    context.browser.find_element(
+        By.ID, 'id_fecha'
+    ).send_keys(manana.strftime('%Y-%m-%d'))
+
+    context.browser.find_element(
+        By.ID, 'id_hora_inicio'
+    ).send_keys('10:00')
+
+    context.browser.find_element(
+        By.ID, 'id_hora_fin'
+    ).send_keys('11:00')
+
+    context.browser.find_element(
+        By.ID, 'id_asistentes'
+    ).send_keys('5')
+
+    context.browser.find_element(
+        By.ID, 'id_proposito'
+    ).send_keys('Prueba capacidad')
+
+    context.browser.find_element(
+        By.ID, 'btn-guardar-reserva'
+    ).click()
+
+@then('el sistema no registra la reservación')
+def step_impl(context):
+    assert not Reservacion.objects.filter(
+        usuario=User.objects.get(username='biankk'),
+        asistentes=5
+    ).exists()
+
+@then('muestra un mensaje indicando que el número de asistentes supera la capacidad de la sala')
+def step_impl(context):
+    assert 'supera la capacidad de la sala' in context.browser.page_source

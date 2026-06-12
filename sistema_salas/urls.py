@@ -20,8 +20,24 @@ from reservaciones import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Login, logout, etc.
     path('accounts/', include('django.contrib.auth.urls')),
+
+    # Inicio
     path('', views.lista_reservaciones_view, name='inicio'),
-    path('reservar/', views.crear_reservacion_view, name='crear_reservacion'),
-    path('cancelar/<int:reservacion_id>/', views.cancelar_reservacion_view, name='cancelar_reservacion'),
+
+    # Crear reservación
+    path(
+        'reservar/',
+        views.crear_reservacion_view,
+        name='crear_reservacion'
+    ),
+
+    # Cancelar reservación
+    path(
+        'cancelar/<int:reservacion_id>/',
+        views.cancelar_reservacion_view,
+        name='cancelar_reservacion'
+    ),
 ]
