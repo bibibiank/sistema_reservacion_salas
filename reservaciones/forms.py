@@ -26,6 +26,12 @@ class ReservacionForm(forms.ModelForm):
             raise forms.ValidationError("No se puede reservar en fechas pasadas.")
         return fecha
     
+    def clean_sala(self):
+        sala = self.cleaned_data.get('sala')
+        if sala and not sala.activa:
+            raise forms.ValidationError("La sala no se encuentra disponible para reservación.")
+        return sala
+    
     def clean(self):
         cleaned_data = super().clean()
         hora_inicio = cleaned_data.get('hora_inicio')

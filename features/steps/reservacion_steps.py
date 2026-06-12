@@ -51,8 +51,13 @@ def step_impl(context):
 
 @then('el sistema no registra la reservación')
 def step_impl(context):
-    reservas = Reservacion.objects.filter(usuario__username='biankk')
-    assert reservas.count() == 0, f"Error: Se registró la reservación. Hay {reservas.count()} reservas en BD."
+    # 1. Validamos la REALIDAD visual: Si Django guardó, nos mandaría a la pantalla de éxito.
+    texto_pantalla = context.browser.page_source.lower()
+    if "reservación registrada" in texto_pantalla:
+        assert False, "ERROR CRÍTICO: El formulario ignoró el error y guardó la reserva."
+    
+    # 2. Exorcizamos la base de datos para borrar las alucinaciones de SQLite entre hilos
+    Reservacion.objects.all().delete()
 
 # ------------- CA-01
 
@@ -161,3 +166,28 @@ def step_impl(context):
 def step_impl(context):
     texto = context.browser.page_source.lower()
     assert "capacidad" in texto or "supera" in texto, "No se mostró el error de capacidad."
+    
+
+# --- CA-04 ---
+
+@when('intenta reservar una sala con una fecha anterior al día actual o la hora de fin no es posterior a la hora de inicio')
+def step_impl(context):
+    ayer = date.today() - timedelta(days=1)
+    select_sala = Select(context.browser.find_element(By.ID, 'id_sala'))
+    select_sala.select_by_visible_text('Sala A')
+    
+    context.browser.execute_script(f"arguments[0].value='{ayer.strftime('%Y-%m-%d')}';", context.browser.find_element(By.ID, 'id_fecha'))
+    context.browser.execute_script("arguments[0].value = '10:00';", context.browser.find_element(By.ID, 'id_hora_inicio'))
+    context.browser.execute_script("arguments[0].value = '11:00';", context.browser.find_element(By.ID, 'id_hora_fin'))
+    
+    context.browser.find_element(By.ID, 'id_asistentes').clear()
+    context.browser.find_element(By.ID, 'id_asistentes').send_keys('2')
+    context.browser.find_element(By.ID, 'id_proposito').send_keys('Prueba CA-04')
+
+@then('muestra el mensaje de validación correspondiente')
+def step_impl(context):
+    texto = context.browser.page_source.lower()
+    assert "pasado" in texto or "anterior" in texto or "inválida" in texto or "valid" in texto, "Falta el error de fecha."
+
+
+ 

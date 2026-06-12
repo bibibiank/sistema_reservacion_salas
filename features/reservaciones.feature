@@ -33,3 +33,11 @@ Característica: Registrar una reservación de sala
     Y envía el formulario
     Entonces el sistema no registra la reservación
     Y muestra un mensaje indicando que el número de asistentes supera la capacidad de la sala
+
+  Escenario: CA-04. Rechazar una fecha u horario inválidos
+    Dado el usuario ha iniciado sesión
+    Cuando navega al formulario de nueva reservacion
+    Y intenta reservar una sala con una fecha anterior al día actual o la hora de fin no es posterior a la hora de inicio
+    Y envía el formulario
+    Entonces el sistema no registra la reservación
+    Y muestra el mensaje de validación correspondiente
