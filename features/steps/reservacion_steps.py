@@ -217,3 +217,61 @@ def step_impl(context):
 def step_impl(context):
     texto = context.browser.page_source.lower()
     assert "inactiva" in texto or "disponible" in texto, "Falta el error de sala inactiva en la pantalla."
+
+# --- CA-06 ---
+# ==========================================
+
+@given('que una sala está disponible para un horario específico')
+def step_impl(context):
+    context.sala = Sala.objects.get(nombre='Sala A')
+    Reservacion.objects.all().delete()
+
+@when('dos solicitudes intentan registrar simultáneamente una reservación para la misma sala y el mismo horario')
+def step_impl(context):
+    User.objects.filter(username='biankk').delete()
+    User.objects.create_user(username='biankk', password='jungkook')
+    
+    context.browser.get(context.base_url + reverse('login'))
+    context.browser.find_element(By.NAME, 'username').send_keys('biankk')
+    context.browser.find_element(By.NAME, 'password').send_keys('jungkook')
+    context.browser.find_element(By.ID, 'btn-login').click()
+    time.sleep(1)
+    
+    context.browser.get(context.base_url + reverse('crear_reservacion'))
+    time.sleep(1)
+    
+    manana = date.today() + timedelta(days=1)
+    select_sala = Select(context.browser.find_element(By.ID, 'id_sala'))
+    select_sala.select_by_visible_text('Sala A')
+    
+    context.browser.execute_script(f"arguments[0].value='{manana.strftime('%Y-%m-%d')}';", context.browser.find_element(By.ID, 'id_fecha'))
+    context.browser.execute_script("arguments[0].value = '10:00';", context.browser.find_element(By.ID, 'id_hora_inicio'))
+    context.browser.execute_script("arguments[0].value = '11:00';", context.browser.find_element(By.ID, 'id_hora_fin'))
+    context.browser.find_element(By.ID, 'id_asistentes').send_keys('2')
+    context.browser.find_element(By.ID, 'id_proposito').send_keys('Concurrencia UI (Petición 1)')
+    
+    t_inicio = datetime.strptime('10:00', '%H:%M').time()
+    t_fin = datetime.strptime('11:00', '%H:%M').time()
+    Reservacion.objects.create(
+        usuario=User.objects.get(username='biankk'),
+        sala=context.sala,
+        fecha=manana,
+        hora_inicio=t_inicio,
+        hora_fin=t_fin,
+        asistentes=2,
+        proposito="Concurrencia Backend (Petición 2 que gana)",
+        estado='VIGENTE'
+    )
+    
+    context.browser.find_element(By.ID, 'btn-guardar-reserva').click()
+    time.sleep(1.5)
+
+@then('solo una reservación queda registrada como vigente')
+def step_impl(context):
+    reservas = Reservacion.objects.filter(sala=context.sala)
+    assert reservas.count() == 1, f"¡Colapso! Se registraron {reservas.count()} reservas concurrentes."
+
+@then('la segunda solicitud recibe una respuesta controlada indicando que la sala ya no está disponible')
+def step_impl(context):
+    texto = context.browser.page_source.lower()
+    assert "traslape" in texto or "vigente en ese horario" in texto or "disponible" in texto, "El sistema no manejó la concurrencia correctamente."

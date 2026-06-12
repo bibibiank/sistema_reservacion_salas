@@ -50,3 +50,9 @@ Característica: Registrar una reservación de sala
     Y envía el formulario
     Entonces el sistema no registra la reservación
     Y muestra un mensaje indicando que la sala no se encuentra disponible para reservación
+
+Escenario: CA-06. Evitar una doble reservación ante solicitudes concurrentes
+    Dado que una sala está disponible para un horario específico
+    Cuando dos solicitudes intentan registrar simultáneamente una reservación para la misma sala y el mismo horario
+    Entonces solo una reservación queda registrada como vigente
+    Y la segunda solicitud recibe una respuesta controlada indicando que la sala ya no está disponible
