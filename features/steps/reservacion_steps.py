@@ -190,4 +190,30 @@ def step_impl(context):
     assert "pasado" in texto or "anterior" in texto or "inválida" in texto or "valid" in texto, "Falta el error de fecha."
 
 
- 
+@given('que existe una sala marcada como inactiva')
+def step_impl(context):
+    Reservacion.objects.all().delete() 
+    Sala.objects.all().delete()
+    
+    Sala.objects.create(nombre='Sala A', activa=True, capacidad=10)
+    context.sala = Sala.objects.create(nombre='Sala B', activa=False, capacidad=10)
+
+@when('intenta registrar una reservación para esa sala')
+def step_impl(context):
+    manana = date.today() + timedelta(days=1)
+    
+    elemento_sala = context.browser.find_element(By.ID, 'id_sala')
+    context.browser.execute_script(f"arguments[0].value = '{context.sala.id}';", elemento_sala)
+    
+    context.browser.execute_script(f"arguments[0].value='{manana.strftime('%Y-%m-%d')}';", context.browser.find_element(By.ID, 'id_fecha'))
+    context.browser.execute_script("arguments[0].value = '10:00';", context.browser.find_element(By.ID, 'id_hora_inicio'))
+    context.browser.execute_script("arguments[0].value = '11:00';", context.browser.find_element(By.ID, 'id_hora_fin'))
+    
+    context.browser.find_element(By.ID, 'id_asistentes').clear()
+    context.browser.find_element(By.ID, 'id_asistentes').send_keys('2')
+    context.browser.find_element(By.ID, 'id_proposito').send_keys('Prueba CA-05 en Sala Inactiva')
+
+@then('muestra un mensaje indicando que la sala no se encuentra disponible para reservación')
+def step_impl(context):
+    texto = context.browser.page_source.lower()
+    assert "inactiva" in texto or "disponible" in texto, "Falta el error de sala inactiva en la pantalla."

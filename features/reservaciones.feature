@@ -41,3 +41,12 @@ Característica: Registrar una reservación de sala
     Y envía el formulario
     Entonces el sistema no registra la reservación
     Y muestra el mensaje de validación correspondiente
+
+  Escenario: CA-05. Rechazar una sala inactiva
+    Dado que existe una sala marcada como inactiva
+    Y el usuario ha iniciado sesión
+    Cuando navega al formulario de nueva reservacion
+    Y intenta registrar una reservación para esa sala
+    Y envía el formulario
+    Entonces el sistema no registra la reservación
+    Y muestra un mensaje indicando que la sala no se encuentra disponible para reservación
