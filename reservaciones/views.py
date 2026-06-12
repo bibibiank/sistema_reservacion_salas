@@ -1,10 +1,12 @@
-from django.shortcuts import render
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ReservacionForm
 from .services import crear_reservacion, cancelar_reservacion
+from django.utils import timezone
+from datetime import datetime, timedelta
+from django.core.exceptions import PermissionDenied
 
 from .models import Reservacion 
 
@@ -36,13 +38,13 @@ def cancelar_reservacion_view(request, reservacion_id):
     if request.method == 'POST':
         try:
             cancelar_reservacion(request.user, reservacion_id)
-            messages.success(request, 'Reservación cancelada con éxito.')
+            messages.success(request, "Reservación cancelada con éxito.")
         except ValidationError as e:
             messages.error(request, e.message)
+            
     return redirect('inicio')
 
 @login_required
 def lista_reservaciones_view(request):
-    # Traemos solo las reservas del usuario autenticado
     reservaciones = Reservacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')
     return render(request, 'reservaciones/lista.html', {'reservaciones': reservaciones})

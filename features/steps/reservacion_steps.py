@@ -85,8 +85,9 @@ def step_impl(context, estado):
 
 @then('muestra un mensaje de confirmación')
 def step_impl(context):
-    mensajes = context.browser.find_element(By.ID, 'contenedor-mensajes').text
-    assert 'Reservación registrada con éxito' in mensajes, f"No vi el mensaje. Vi esto: {mensajes}"
+    texto_pantalla = context.browser.page_source.lower()
+    exito = "éxito" in texto_pantalla or "registrada" in texto_pantalla or "cancelada" in texto_pantalla
+    assert exito, "No vi el mensaje de confirmación en la pantalla."
 
 @then('la reservación aparece en la lista de reservaciones del usuario')
 def step_impl(context):

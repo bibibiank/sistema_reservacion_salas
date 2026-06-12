@@ -11,7 +11,7 @@
                 <th>Fecha</th>
                 <th>Horario</th>
                 <th>Estado</th>
-            </tr>
+                <th>Acciones</th> </tr>
         </thead>
         <tbody>
             {% for reserva in reservaciones %}
@@ -19,11 +19,24 @@
                     <td>{{ reserva.sala.nombre }}</td>
                     <td>{{ reserva.fecha }}</td>
                     <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
-                    <td>{{ reserva.estado }}</td>
+                    <td>
+                        {{ reserva.estado }}
+                        {% if reserva.estado == 'CANCELADA' and reserva.fecha_cancelacion %}
+                            <br><small class="texto-cancelacion">Cancelada el: {{ reserva.fecha_cancelacion|date:"Y-m-d H:i" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reserva.estado == 'VIGENTE' %}
+                            <form method="post" action="{% url 'cancelar_reservacion' reserva.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-cancelar" id="btn-cancelar-{{ reserva.id }}">Cancelar</button>
+                            </form>
+                        {% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" id="mensaje-vacio">No tienes reservaciones vigentes.</td>
+                    <td colspan="5" id="mensaje-vacio">No tienes reservaciones vigentes.</td>
                 </tr>
             {% endfor %}
         </tbody>
