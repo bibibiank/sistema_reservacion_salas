@@ -12,3 +12,11 @@ Característica: Cancelar una reservación de sala
     Y muestra un mensaje de confirmación
     Y la sala vuelve a estar disponible para ese horario.
 
+  Escenario: CA-08. Impedir que un usuario cancele una reservación ajena
+    Dado que existe una reservación vigente perteneciente a otro usuario
+    Y el usuario autenticado intenta cancelarla
+    Entonces el sistema rechaza la operación
+    Y mantiene la reservación en estado "VIGENTE"
+    Y responde sin revelar información sensible de la reservación.
+
+  

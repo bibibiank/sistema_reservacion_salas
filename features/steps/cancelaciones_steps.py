@@ -84,3 +84,29 @@ def step_impl(context):
         hora_inicio=context.reserva.hora_inicio, estado='VIGENTE'
     ).exists()
     assert nueva_reserva_valida, "La sala sigue bloqueada, no liberó el horario."
+
+# --- CA-08. Impedir cancelar reserva ajena
+# 
+
+@given('que existe una reservación vigente perteneciente a otro usuario')
+def step_impl(context):
+    Reservacion.objects.all().delete()
+    sala, _ = Sala.objects.get_or_create(nombre='Sala CA-08', activa=True, capacidad=10)
+    victima, _ = User.objects.get_or_create(username='victima_08')
+    
+    context.reserva_ajena = Reservacion.objects.create(
+        usuario=victima, sala=sala, fecha=date.today() + timedelta(days=1),
+        hora_inicio='15:00', hora_fin='16:00', asistentes=2,
+        proposito="Reserva secreta de victima", estado='VIGENTE'
+    )
+
+@given('el usuario autenticado intenta cancelarla')
+def step_impl(context):
+    context.test.client.login(username='biankk', password='password123')
+    url = reverse('cancelar_reservacion', args=[context.reserva_ajena.id])
+    context.respuesta_ataque = context.test.client.post(url, follow=True)
+
+@then('responde sin revelar información sensible de la reservación.')
+def step_impl(context):
+    texto = context.respuesta_ataque.content.decode('utf-8').lower()
+    assert "reserva secreta" not in texto, "¡Fuga de datos! Mostró detalles de la víctima."
