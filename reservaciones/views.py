@@ -8,7 +8,8 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.core.exceptions import PermissionDenied
 
-from .models import Reservacion 
+from .models import Reservacion
+
 
 @login_required
 def crear_reservacion_view(request):
@@ -31,7 +32,10 @@ def crear_reservacion_view(request):
                 form.add_error(None, e.message)
     else:
         form = ReservacionForm()
-    return render(request, 'reservaciones/crear_reservacion.html', {'form': form})
+    return render(request,
+                  'reservaciones/crear_reservacion.html',
+                  {'form': form})
+
 
 @login_required
 def cancelar_reservacion_view(request, reservacion_id):
@@ -41,10 +45,13 @@ def cancelar_reservacion_view(request, reservacion_id):
             messages.success(request, "Reservación cancelada con éxito.")
         except ValidationError as e:
             messages.error(request, e.message)
-            
+
     return redirect('inicio')
+
 
 @login_required
 def lista_reservaciones_view(request):
-    reservaciones = Reservacion.objects.filter(usuario=request.user).order_by('-fecha_creacion')
-    return render(request, 'reservaciones/lista.html', {'reservaciones': reservaciones})
+    reservaciones = Reservacion.objects.filter(
+        usuario=request.user).order_by('-fecha_creacion')
+    return render(request, 'reservaciones/lista.html',
+                  {'reservaciones': reservaciones})

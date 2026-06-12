@@ -22,8 +22,6 @@ db.sqlite3
 =========================
 Pruebas y Cobertura
 =========================
-.coverage
-htmlcov/
 .pytest_cache/
 
 =========================

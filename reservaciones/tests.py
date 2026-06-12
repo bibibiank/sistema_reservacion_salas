@@ -14,11 +14,13 @@ from django.db import OperationalError
 from time import sleep, timezone
 from django.utils import timezone
 
+
 class ReservacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
 
     def setUp(self):
-        self.usuario = User.objects.create_user(username='biankk', password='jungkook')
+        self.usuario = User.objects.create_user(
+            username='biankk', password='jungkook')
         self.sala = Sala.objects.get(nombre='Sala A')
         self.url = reverse('crear_reservacion')
 
@@ -34,7 +36,7 @@ class ReservacionTests(TestCase):
         )
 
         self.assertEqual(reservacion.estado, 'VIGENTE')
-        self.assertEqual(Reservacion.objects.count(), 1)        
+        self.assertEqual(Reservacion.objects.count(), 1)
 
     def test_ut02_rechazar_proposito_corto(self):
         form_data = {
@@ -43,10 +45,10 @@ class ReservacionTests(TestCase):
             'hora_inicio': '10:00',
             'hora_fin': '11:00',
             'asistentes': 2,
-            'proposito': 'corto' # ¡Menos de 10 caracteres!
+            'proposito': 'corto'  # ¡Menos de 10 caracteres!
         }
         form = ReservacionForm(data=form_data)
-    
+
         self.assertFalse(form.is_valid())
         self.assertIn('proposito', form.errors)
 
@@ -56,7 +58,7 @@ class ReservacionTests(TestCase):
             'fecha': date.today() + timedelta(days=1),
             'hora_inicio': '10:00',
             'hora_fin': '11:00',
-            'asistentes': 0, 
+            'asistentes': 0,
             'proposito': 'Reunión de estudio válida'
         }
         form = ReservacionForm(data=form_data)
@@ -72,14 +74,14 @@ class ReservacionTests(TestCase):
                 fecha=date(2026, 6, 16),
                 hora_inicio=time(10, 0),
                 hora_fin=time(11, 0),
-                asistentes=5, 
+                asistentes=5,
                 proposito="Reunión de estudio"
             )
 
     def test_ut05_rechazar_fecha_pasada(self):
         form_data = {
             'sala': self.sala.id,
-            'fecha': date.today() - timedelta(days=1), 
+            'fecha': date.today() - timedelta(days=1),
             'hora_inicio': '10:00',
             'hora_fin': '11:00',
             'asistentes': 2,
@@ -94,7 +96,7 @@ class ReservacionTests(TestCase):
             'sala': self.sala.id,
             'fecha': date.today() + timedelta(days=1),
             'hora_inicio': '11:00',
-            'hora_fin': '10:00', 
+            'hora_fin': '10:00',
             'asistentes': 2,
             'proposito': 'Reunión de estudio válida'
         }
@@ -104,29 +106,45 @@ class ReservacionTests(TestCase):
     def test_ut07_rechazar_duracion_invalida(self):
         with self.assertRaises(ValidationError):
             crear_reservacion(
-                self.usuario, self.sala, date(2026, 6, 17), 
+                self.usuario, self.sala, date(2026, 6, 17),
                 time(10, 0), time(10, 20), 2, "Proposito válido"
             )
         with self.assertRaises(ValidationError):
             crear_reservacion(
-                self.usuario, self.sala, date(2026, 6, 17), 
+                self.usuario, self.sala, date(2026, 6, 17),
                 time(10, 0), time(13, 0), 2, "Proposito válido"
             )
 
     def test_ut08_detectar_traslapes(self):
         crear_reservacion(
-            self.usuario, self.sala, date(2026, 6, 18), 
+            self.usuario, self.sala, date(2026, 6, 18),
             time(10, 0), time(12, 0), 2, "Reserva Base"
         )
 
         with self.assertRaises(ValidationError):
-            crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(9, 30), time(10, 30), 2, "Parcial")
+            crear_reservacion(
+                self.usuario, self.sala, date(
+                    2026, 6, 18), time(
+                    9, 30), time(
+                    10, 30), 2, "Parcial")
         with self.assertRaises(ValidationError):
-            crear_reservacion(self.usuario, self.sala, date(2026, 6, 18), time(10, 30), time(11, 30), 2, "Contenido")
-    
+            crear_reservacion(
+                self.usuario, self.sala, date(
+                    2026, 6, 18), time(
+                    10, 30), time(
+                    11, 30), 2, "Contenido")
+
     def test_ut09_permitir_horarios_adyacentes(self):
-        crear_reservacion(self.usuario, self.sala, date(2026, 6, 19), time(10, 0), time(11, 0), 2, "Reserva 1")
-        res_2 = crear_reservacion(self.usuario, self.sala, date(2026, 6, 19), time(11, 0), time(12, 0), 2, "Reserva 2")
+        crear_reservacion(
+            self.usuario, self.sala, date(
+                2026, 6, 19), time(
+                10, 0), time(
+                11, 0), 2, "Reserva 1")
+        res_2 = crear_reservacion(
+            self.usuario, self.sala, date(
+                2026, 6, 19), time(
+                11, 0), time(
+                12, 0), 2, "Reserva 2")
         self.assertEqual(res_2.estado, 'VIGENTE')
 
     def test_ut10_ignorar_reservaciones_canceladas(self):
@@ -136,11 +154,11 @@ class ReservacionTests(TestCase):
             proposito="Cancelada", estado='CANCELADA'
         )
         res_nueva = crear_reservacion(
-            self.usuario, self.sala, date(2026, 6, 20), 
+            self.usuario, self.sala, date(2026, 6, 20),
             time(10, 0), time(11, 0), 2, "Nueva"
         )
         self.assertEqual(res_nueva.estado, 'VIGENTE')
-    
+
     def test_ut11_impedir_acceso_anonimo(self):
         response = self.client.get(self.url)
         # Debe redirigir al login (código HTTP 302)
@@ -161,28 +179,35 @@ class ReservacionTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Reservacion.objects.count(), 1)
 
+
 class ConcurrenciaTests(TransactionTestCase):
     fixtures = ['salas_iniciales.json']
 
     def setUp(self):
-        self.usuario1 = User.objects.create_user(username='miguelon', password='skrillex')
-        self.usuario2 = User.objects.create_user(username='sadnisbi', password='bts')
+        self.usuario1 = User.objects.create_user(
+            username='miguelon', password='skrillex')
+        self.usuario2 = User.objects.create_user(
+            username='sadnisbi', password='bts')
         self.sala = Sala.objects.get(nombre='Sala A')
 
     def test_it01_solicitudes_concurrentes(self):
         def intento_de_reserva(usuario, retardo):
-            sleep(retardo)  
+            sleep(retardo)
             try:
                 crear_reservacion(
-                    usuario, self.sala, date(2026, 6, 25), 
+                    usuario, self.sala, date(2026, 6, 25),
                     time(10, 0), time(11, 0), 2, "Concurrencia"
                 )
             except (ValidationError, OperationalError):
-                pass 
+                pass
 
-        hilo1 = threading.Thread(target=intento_de_reserva, args=(self.usuario1, 0))
-        hilo2 = threading.Thread(target=intento_de_reserva, args=(self.usuario2, 0.1))
-        
+        hilo1 = threading.Thread(
+            target=intento_de_reserva, args=(
+                self.usuario1, 0))
+        hilo2 = threading.Thread(
+            target=intento_de_reserva, args=(
+                self.usuario2, 0.1))
+
         hilo1.start()
         hilo2.start()
         hilo1.join()
@@ -191,15 +216,16 @@ class ConcurrenciaTests(TransactionTestCase):
         self.assertEqual(Reservacion.objects.count(), 1)
 
 
-
 class CancelacionTests(TestCase):
     fixtures = ['salas_iniciales.json']
 
     def setUp(self):
-        self.usuario = User.objects.create_user(username='biankk', password='pwd')
-        self.otro_usuario = User.objects.create_user(username='intruso', password='pwd')
+        self.usuario = User.objects.create_user(
+            username='biankk', password='pwd')
+        self.otro_usuario = User.objects.create_user(
+            username='intruso', password='pwd')
         self.sala = Sala.objects.get(nombre='Sala A')
-        
+
         manana = date.today() + timedelta(days=1)
         self.reserva = Reservacion.objects.create(
             usuario=self.usuario, sala=self.sala, fecha=manana,
@@ -209,7 +235,7 @@ class CancelacionTests(TestCase):
 
     def test_ut13_cancelar_reservacion_valida(self):
         res_cancelada = cancelar_reservacion(self.usuario, self.reserva.id)
-        
+
         self.assertEqual(res_cancelada.estado, 'CANCELADA')
         self.assertIsNotNone(res_cancelada.fecha_cancelacion)
 
@@ -246,11 +272,13 @@ class CancelacionTests(TestCase):
         )
         self.assertEqual(nueva_reserva.estado, 'VIGENTE')
 
+
 class CancelacionVistasTests(TestCase):
     fixtures = ['salas_iniciales.json']
 
     def setUp(self):
-        self.usuario = User.objects.create_user(username='biankk', password='pwd')
+        self.usuario = User.objects.create_user(
+            username='biankk', password='pwd')
         self.sala = Sala.objects.get(nombre='Sala A')
         manana = date.today() + timedelta(days=1)
         self.reserva = Reservacion.objects.create(
@@ -262,12 +290,11 @@ class CancelacionVistasTests(TestCase):
 
     def test_ut19_impedir_cancelacion_anonima(self):
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302) 
+        self.assertEqual(response.status_code, 302)
 
     def test_ut20_cancelar_reservacion_post(self):
         self.client.login(username='biankk', password='pwd')
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302) 
+        self.assertEqual(response.status_code, 302)
         self.reserva.refresh_from_db()
         self.assertEqual(self.reserva.estado, 'CANCELADA')
-    

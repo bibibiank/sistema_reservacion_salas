@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Sala(models.Model):
     nombre = models.CharField(max_length=50)
     capacidad = models.IntegerField()
@@ -10,6 +11,7 @@ class Sala(models.Model):
 
     def __str__(self):
         return self.nombre
+
 
 class Reservacion(models.Model):
     ESTADOS = (
@@ -24,9 +26,16 @@ class Reservacion(models.Model):
     hora_fin = models.TimeField()
     asistentes = models.IntegerField()
     proposito = models.CharField(max_length=200)
-    estado = models.CharField(max_length=15, choices=ESTADOS, default='VIGENTE')
+    estado = models.CharField(
+        max_length=15,
+        choices=ESTADOS,
+        default='VIGENTE')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_cancelacion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.sala.nombre} - {self.fecha} ({self.hora_inicio} a {self.hora_fin})"
+        return f"{
+            self.sala.nombre} - {
+            self.fecha} ({
+            self.hora_inicio} a {
+                self.hora_fin})"
