@@ -136,3 +136,22 @@ def step_impl(context):
 def step_impl(context):
     texto = context.respuesta_ataque.content.decode('utf-8').lower()
     assert "anticipación" in texto or "60" in texto, f"Falta error de tiempo. Django dijo: {texto}"
+
+# --- CA-10. Cancelar algo ya cancelado
+
+@given('que el usuario es propietario de una reservación cancelada')
+def step_impl(context):
+    context.execute_steps('Dado es propietario de una reservación vigente cuyo inicio ocurrirá dentro de más de 60 minutos')
+    context.reserva.estado = 'CANCELADA'
+    context.reserva.save()
+
+@when('intenta cancelarla nuevamente')
+def step_impl(context):
+    context.test.client.login(username='biankk', password='password123')
+    url = reverse('cancelar_reservacion', args=[context.reserva.id])
+    context.respuesta_ataque = context.test.client.post(url, follow=True)
+
+@then('muestra un mensaje indicando que la reservación ya fue cancelada.')
+def step_impl(context):
+    texto = context.respuesta_ataque.content.decode('utf-8').lower()
+    assert "ya fue cancelada" in texto or "cancelada" in texto, f"Falta mensaje de doble cancelación. Django dijo: {texto}"

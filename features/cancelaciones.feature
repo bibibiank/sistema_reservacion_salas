@@ -26,3 +26,10 @@ Característica: Cancelar una reservación de sala
     Entonces el sistema rechaza la operación
     Y mantiene la reservación en estado "VIGENTE"
     Y muestra un mensaje indicando que el periodo de cancelación ha concluido.
+
+  Escenario: CA-10. Impedir cancelar nuevamente una reservación cancelada
+    Dado que el usuario es propietario de una reservación cancelada
+    Cuando intenta cancelarla nuevamente
+    Entonces el sistema rechaza la operación
+    Y conserva el estado "CANCELADA"
+    Y muestra un mensaje indicando que la reservación ya fue cancelada.
