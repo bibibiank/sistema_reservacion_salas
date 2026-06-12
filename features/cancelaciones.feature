@@ -33,3 +33,9 @@ Característica: Cancelar una reservación de sala
     Entonces el sistema rechaza la operación
     Y conserva el estado "CANCELADA"
     Y muestra un mensaje indicando que la reservación ya fue cancelada.
+
+  Escenario: CA-11. Mantener la trazabilidad de la cancelación
+    Dado que el usuario cancela correctamente una reservación
+    Cuando consulta su historial
+    Entonces observa la reservación con estado "CANCELADA"
+    Y puede identificar la fecha y hora en la que se realizó la cancelación.

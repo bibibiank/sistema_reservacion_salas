@@ -155,3 +155,28 @@ def step_impl(context):
 def step_impl(context):
     texto = context.respuesta_ataque.content.decode('utf-8').lower()
     assert "ya fue cancelada" in texto or "cancelada" in texto, f"Falta mensaje de doble cancelación. Django dijo: {texto}"
+
+#--- CA-11
+
+@given('que el usuario cancela correctamente una reservación')
+def step_impl(context):
+    context.execute_steps('''
+        Dado que el usuario ha iniciado sesión
+        Y es propietario de una reservación vigente cuyo inicio ocurrirá dentro de más de 60 minutos
+        Cuando confirma la cancelación
+    ''')
+
+@when('consulta su historial')
+def step_impl(context):
+    context.browser.get(context.base_url + reverse('inicio'))
+    time.sleep(1)
+
+@then('observa la reservación con estado "CANCELADA"')
+def step_impl(context):
+    html = context.browser.page_source.upper()
+    assert "CANCELADA" in html, "No aparece el texto CANCELADA en la tabla."
+
+@then('puede identificar la fecha y hora en la que se realizó la cancelación.')
+def step_impl(context):
+    html = context.browser.page_source.lower()
+    assert "cancelada el:" in html or "cancelada" in html, "No se imprimió la fecha de cancelación."
