@@ -6,6 +6,7 @@ Característica: Registrar una reservación de sala
   Escenario: CA-01. Registrar una reservación válida
     Dado que existe una sala activa con capacidad suficiente
     Y el usuario ha iniciado sesión
+    Y no existe otra reservación vigente que se traslape con el horario solicitado
     Cuando navega al formulario de nueva reservacion
     Y captura una fecha válida, una hora de inicio y una hora de fin válidas
     Y captura un número de asistentes permitido y un propósito válido
@@ -13,21 +14,22 @@ Característica: Registrar una reservación de sala
     Entonces el sistema registra la reservación con estado "VIGENTE"
     Y muestra un mensaje de confirmación
     Y la reservación aparece en la lista de reservaciones del usuario
-    
-  Escenario: CA-02. Rechazar reservación por traslape de horario
-    Dado que existe una sala activa con capacidad suficiente
+
+  Escenario: CA-02. Rechazar una reservación con horario traslapado
+    Dado que existe una reservación vigente para una sala entre las "10:00" y las "11:00"
     Y el usuario ha iniciado sesión
-    Y existe una reservación previa en la sala de "10:00" a "12:00" para mañana
     Cuando navega al formulario de nueva reservacion
-    Y captura la misma fecha, hora de inicio "11:00" y hora de fin "13:00"
+    Y intenta registrar otra reservación para la misma sala entre las "10:30" y las "11:30"
     Y captura un número de asistentes permitido y un propósito válido
     Y envía el formulario
-    Entonces el sistema rechaza la reservación
-    Y muestra un mensaje de error indicando el traslape
+    Entonces el sistema no registra la nueva reservación
+    Y muestra un mensaje indicando que la sala no está disponible en el horario solicitado
 
   Escenario: CA-03. Rechazar una reservación que exceda la capacidad
     Dado que una sala activa tiene capacidad para 4 personas
     Y el usuario ha iniciado sesión
-    Cuando intenta registrar una reservación para 5 asistentes
+    Cuando navega al formulario de nueva reservacion
+    Y intenta registrar una reservación para 5 asistentes
+    Y envía el formulario
     Entonces el sistema no registra la reservación
     Y muestra un mensaje indicando que el número de asistentes supera la capacidad de la sala
