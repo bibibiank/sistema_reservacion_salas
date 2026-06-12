@@ -19,4 +19,10 @@ Característica: Cancelar una reservación de sala
     Y mantiene la reservación en estado "VIGENTE"
     Y responde sin revelar información sensible de la reservación.
 
-  
+  Escenario: CA-09. Impedir cancelación fuera del periodo permitido
+    Dado que el usuario es propietario de una reservación vigente
+    Y faltan 60 minutos o menos para su inicio
+    Cuando intenta cancelarla
+    Entonces el sistema rechaza la operación
+    Y mantiene la reservación en estado "VIGENTE"
+    Y muestra un mensaje indicando que el periodo de cancelación ha concluido.

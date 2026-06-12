@@ -110,3 +110,29 @@ def step_impl(context):
 def step_impl(context):
     texto = context.respuesta_ataque.content.decode('utf-8').lower()
     assert "reserva secreta" not in texto, "¡Fuga de datos! Mostró detalles de la víctima."
+
+# --- CA-09. Fuera de periodo permitido
+
+@given('que el usuario es propietario de una reservación vigente')
+def step_impl(context):
+    context.execute_steps('Dado es propietario de una reservación vigente cuyo inicio ocurrirá dentro de más de 60 minutos')
+
+@given('faltan 60 minutos o menos para su inicio')
+def step_impl(context):
+    ahora = timezone.now()
+    inicio_cercano = ahora + timedelta(minutes=30) # Faltan solo 30 mins
+    context.reserva.fecha = inicio_cercano.date()
+    context.reserva.hora_inicio = inicio_cercano.time()
+    context.reserva.hora_fin = (inicio_cercano + timedelta(hours=1)).time()
+    context.reserva.save()
+
+@when('intenta cancelarla')
+def step_impl(context):
+    context.test.client.login(username='biankk', password='password123')
+    url = reverse('cancelar_reservacion', args=[context.reserva.id])
+    context.respuesta_ataque = context.test.client.post(url, follow=True)
+
+@then('muestra un mensaje indicando que el periodo de cancelación ha concluido.')
+def step_impl(context):
+    texto = context.respuesta_ataque.content.decode('utf-8').lower()
+    assert "anticipación" in texto or "60" in texto, f"Falta error de tiempo. Django dijo: {texto}"
